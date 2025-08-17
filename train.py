@@ -72,7 +72,7 @@ if __name__ == '__main__':
             epoch_loss += loss
         
         avg_loss = epoch_loss / num_train_steps
-        print(F"Epoch {epoch + 1} / {NUM_EPOCHS}, Average Loss: {avg_loss:.4f}")
+        print(f"Epoch {epoch + 1} / {NUM_EPOCHS}, Average Loss: {avg_loss:.4f}")
     
     key, gen_key = jax.random.split(key)
     
