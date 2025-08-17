@@ -1,0 +1,7 @@
+jax
+flax
+optax
+tensorflow
+tensorflow-datasets
+matplotlib
+numpy
