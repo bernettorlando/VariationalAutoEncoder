@@ -9,8 +9,8 @@ def get_datasets():
     train_ds = tfds.as_numpy(ds_builder.as_dataset(split='train', batch_size=-1))
     test_ds = tfds.as_numpy(ds_builder.as_dataset(split='test', batch_size=-1))
 
-    train_images = (train_ds['image'].astype(jnp.float32) / 255.0).reshape(train_ds['image'].shape[0], -1)
-    test_images = (test_ds['image'].astype(jnp.float32) / 255.0).reshape(test_ds['image'].shape[0], -1)
+    train_images = (train_ds['image'].astype(jnp.float32) / 255.0)
+    test_images = (test_ds['image'].astype(jnp.float32) / 255.0)
 
     train_images = jnp.round(train_images)
     test_images = jnp.round(test_images)

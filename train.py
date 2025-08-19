@@ -14,7 +14,7 @@ def loss_function(reconstructed_x, x, mu, log_var):
     kl_loss = -0.5 * jnp.sum(1 + log_var - jnp.square(mu) - jnp.exp(log_var), axis=-1)
     kl_divergence = jnp.mean(kl_loss)
 
-    return jnp.mean(bce_loss + kl_divergence)
+    return jnp.mean(bce_loss + 0.5 * kl_divergence)
 
 @jax.jit
 def train_step(state, batch, key):
@@ -33,7 +33,7 @@ def train_step(state, batch, key):
 if __name__ == '__main__':
     # Hyperparams
     LEARNING_RATE = 1e-3
-    NUM_EPOCHS = 50
+    NUM_EPOCHS = 100
     BATCH_SIZE = 128
     LATENT_DIM = 2
 
@@ -45,7 +45,7 @@ if __name__ == '__main__':
 
     model = VAE(latent_dim=LATENT_DIM)
 
-    dummy_input = jnp.ones((BATCH_SIZE, train_images.shape[1]))
+    dummy_input = jnp.ones((BATCH_SIZE, 28, 28, 1))
     params = model.init(model_key, dummy_input, model_key)['params']
 
     optimizer = optax.adamw(learning_rate=LEARNING_RATE)
