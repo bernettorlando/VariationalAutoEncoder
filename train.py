@@ -6,22 +6,23 @@ from data import get_datasets
 from model import VAE
 import matplotlib.pyplot as plt
 
-def loss_function(reconstructed_x, x, mu, log_var):
+def loss_function(reconstructed_x, x, mu, log_var, beta):
     # 1. Reconstruction loss
-    bce_loss = optax.sigmoid_binary_cross_entropy(reconstructed_x, x).sum(axis=-1)
+    # bce_loss = optax.sigmoid_binary_cross_entropy(reconstructed_x, x).sum(axis=-1)
+    mse_loss = jnp.sum((x - reconstructed_x)**2, axis=(1,2,3))
 
     # 2. KL Divergence loss
     kl_loss = -0.5 * jnp.sum(1 + log_var - jnp.square(mu) - jnp.exp(log_var), axis=-1)
     kl_divergence = jnp.mean(kl_loss)
 
-    return jnp.mean(bce_loss + 0.5 * kl_divergence)
+    return jnp.mean(mse_loss + beta * kl_divergence)
 
 @jax.jit
-def train_step(state, batch, key):
+def train_step(state, batch, key, beta):
 
     def loss_fn(params):
         reconstructed_x, mu, log_var = state.apply_fn({'params': params}, batch, key)
-        loss = loss_function(reconstructed_x, batch, mu, log_var)
+        loss = loss_function(reconstructed_x, batch, mu, log_var, beta)
         return loss
     
     loss, grads = jax.value_and_grad(loss_fn)(state.params)
@@ -33,7 +34,7 @@ def train_step(state, batch, key):
 if __name__ == '__main__':
     # Hyperparams
     LEARNING_RATE = 1e-3
-    NUM_EPOCHS = 100
+    NUM_EPOCHS = 50
     BATCH_SIZE = 128
     LATENT_DIM = 2
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     dummy_input = jnp.ones((BATCH_SIZE, 28, 28, 1))
     params = model.init(model_key, dummy_input, model_key)['params']
 
-    optimizer = optax.adamw(learning_rate=LEARNING_RATE)
+    optimizer = optax.adam(learning_rate=LEARNING_RATE)
 
     state = train_state.TrainState.create(
         apply_fn=model.apply,
@@ -62,13 +63,14 @@ if __name__ == '__main__':
         shuffled_images = train_images[perm]
 
         epoch_loss = 0
+        beta = 1.0
 
         for i in range(num_train_steps):
             batch_images = shuffled_images[i*BATCH_SIZE : (i+1)*BATCH_SIZE]
 
             step_key, train_key = jax.random.split(train_key)
 
-            state, loss = train_step(state, batch_images, step_key)
+            state, loss = train_step(state, batch_images, step_key, beta)
             epoch_loss += loss
         
         avg_loss = epoch_loss / num_train_steps

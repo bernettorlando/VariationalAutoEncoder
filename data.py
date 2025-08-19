@@ -12,8 +12,8 @@ def get_datasets():
     train_images = (train_ds['image'].astype(jnp.float32) / 255.0)
     test_images = (test_ds['image'].astype(jnp.float32) / 255.0)
 
-    train_images = jnp.round(train_images)
-    test_images = jnp.round(test_images)
+    # train_images = jnp.round(train_images)
+    # test_images = jnp.round(test_images)
 
     return train_images, test_images
 

@@ -10,15 +10,16 @@ class Encoder(nn.Module):
 
     @nn.compact
     def __call__(self, x):
-        x = nn.Conv(features=32, kernel_size=(3, 3), strides=(1, 1))(x)
+        x = nn.Conv(features=32, kernel_size=(3, 3), strides=(2, 2), padding='SAME')(x)
         x = nn.relu(x)
-        x = nn.max_pool(x, window_shape=(2, 2), strides=(2, 2))
 
-        x = nn.Conv(features=64, kernel_size=(3, 3), strides=(1, 1))(x)
+        x = nn.Conv(features=64, kernel_size=(3, 3), strides=(2,2), padding='SAME')(x)
         x = nn.relu(x)
-        x = nn.max_pool(x, window_shape=(2, 2), strides=(2, 2))
 
         x = x.reshape((x.shape[0], -1))
+        x = nn.Dense(features=16)(x)
+        x = nn.relu(x)
+
         mean = nn.Dense(features=self.latent_dim, name='mean')(x)
         log_var = nn.Dense(features=self.latent_dim, name='log_var')(x)
 
@@ -42,7 +43,7 @@ class Decoder(nn.Module):
         z = nn.ConvTranspose(features=32, kernel_size=(3, 3), strides=(2, 2), padding='SAME')(z)
         z = nn.relu(z)
 
-        x = nn.Conv(features=1, kernel_size=(3, 3), padding='SAME')(z)
+        x = nn.ConvTranspose(features=1, kernel_size=(3, 3), strides=(1, 1), padding='SAME')(z)
         return nn.sigmoid(x)
 
 
@@ -71,4 +72,3 @@ class VAE(nn.Module):
     def decode(self, z):
         return self.decoder(z)
     
-
