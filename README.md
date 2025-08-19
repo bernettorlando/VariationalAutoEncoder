@@ -49,3 +49,7 @@ python train.py
 ## Generated Output
 
 The model generates new digit images by sampling from the learned latent space and displays them using matplotlib.
+
+![Generated Images](generated_images.png)
+
+*Example of 10 generated MNIST digits from the trained VAE*
